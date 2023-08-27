@@ -1,9 +1,16 @@
 function Deposit() {
   const [show, setShow] = React.useState(true)
   const [status, setStatus] = React.useState('')
-  const [balance, setBalance] = React.useState('100')
   const [deposit, setDeposit] = React.useState('')
+  const [balance, setBalance] = React.useState(() => {
+    const storedBalance = localStorage.getItem('balance')
+    return storedBalance ? Number(storedBalance) : 0
+  })
   const ctx = React.useContext(UserContext)
+
+  React.useEffect(() => {
+    localStorage.setItem('balance', balance)
+  }, [balance])
 
   function validate(field, label) {
     if (!field) {
@@ -16,7 +23,18 @@ function Deposit() {
 
   function handleDeposit() {
     if (!validate(deposit, 'deposit')) return
-    ctx.users.push({ balance: 100 })
+
+    const depositAmount = Number(deposit)
+
+    if (isNaN(depositAmount)) {
+      alert('Enter a number for the amount.')
+    } else if (depositAmount < 0) {
+      alert('Enter a positive value to deposit.')
+    }
+
+    const newBalance = Number(balance) + Number(deposit)
+
+    setBalance(newBalance)
     setShow(false)
   }
 
@@ -57,7 +75,7 @@ function Deposit() {
           <>
             <h5>Success</h5>
             <button type="submit" className="btn btn-light" onClick={clearForm}>
-              Deposit More Money
+              Check updated balance
             </button>
           </>
         )

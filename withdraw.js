@@ -1,9 +1,16 @@
 function Withdraw() {
   const [show, setShow] = React.useState(true)
   const [status, setStatus] = React.useState('')
-  const [balance, setBalance] = React.useState('100')
   const [withdraw, setWithdraw] = React.useState('')
+  const [balance, setBalance] = React.useState(() => {
+    const storedBalance = localStorage.getItem('balance')
+    return storedBalance ? Number(storedBalance) : 0
+  })
   const ctx = React.useContext(UserContext)
+
+  React.useEffect(() => {
+    localStorage.setItem('balance', balance)
+  }, [balance])
 
   function validate(field, label) {
     if (!field) {
@@ -16,7 +23,18 @@ function Withdraw() {
 
   function handleWithdraw() {
     if (!validate(withdraw, 'withdraw')) return
-    ctx.users.push({ balance: 100 })
+
+    const withdrawAmount = Number(withdraw)
+
+    if (isNaN(withdrawAmount)) {
+      alert('Enter a number for the amount.')
+    } else if (withdrawAmount > balance) {
+      alert('There are not that many funds available.')
+    }
+
+    const newBalance = Number(balance) - Number(withdraw)
+
+    setBalance(newBalance)
     setShow(false)
   }
 
@@ -57,7 +75,7 @@ function Withdraw() {
           <>
             <h5>Success</h5>
             <button type="submit" className="btn btn-light" onClick={clearForm}>
-              Withdraw More Money
+              Check updated balance
             </button>
           </>
         )
